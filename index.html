@@ -17,32 +17,38 @@
     }
     #game {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      grid-template-columns: repeat(4, 1fr); /* 4 kartice v vrstici */
       gap: 1rem;
       max-width: 600px;
       margin: 0 auto;
     }
     .card {
-      background: #fff;
       border: 2px solid #ccc;
       padding: 1.5rem;
       font-size: 1.2rem;
       cursor: pointer;
       user-select: none;
       transition: background 0.3s;
+      background: #ffffff;
+    }
+    .card[data-type="bin"] {
+      background: #e0f0ff; /* svetlo modra */
+    }
+    .card[data-type="dec"] {
+      background: #eeeeee; /* svetlo siva */
     }
     .matched {
-      background: #d4edda;
+      background: #d4edda !important;
       color: #2e7d32;
       pointer-events: none;
     }
     .flipped {
-      background: #e3f2fd;
+      background: #fff !important;
     }
   </style>
 </head>
 <body>
-  <h1>🧠 Ujemanje parov: dvojiško ↔ desetiško</h1>
+  <h1>Ujemanje parov: dvojiško ↔ desetiško</h1>
   <div id="game"></div>
   <p id="status"></p>
 
@@ -111,7 +117,7 @@
       }
 
       if (matched.length === numPairs * 2) {
-        status.textContent = '🎉 Vse pare si našel!';
+        status.textContent = 'Našel si vse pare!';
       }
     }
 
