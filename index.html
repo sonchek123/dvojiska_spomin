@@ -15,9 +15,24 @@
     h1 {
       margin-bottom: 1rem;
     }
+    #controls {
+      margin-bottom: 1rem;
+    }
+    .pair-btn {
+      padding: 0.5rem 1rem;
+      margin: 0 0.25rem;
+      border: 2px solid #ccc;
+      background-color: #fff;
+      cursor: pointer;
+    }
+    .pair-btn.selected {
+      border-color: #1e88e5;
+      background-color: #e3f2fd;
+      font-weight: bold;
+    }
     #game {
       display: grid;
-      grid-template-columns: repeat(4, 1fr); /* 4 kartice v vrstici */
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
       max-width: 600px;
       margin: 0 auto;
@@ -29,41 +44,68 @@
       cursor: pointer;
       user-select: none;
       transition: background 0.3s;
-      background: #ffffff;
+      background: #dddddd;
     }
-    .card[data-type="bin"] {
-      background: #e0f0ff; /* svetlo modra */
+    .card.flipped[data-type="bin"] {
+      background: #e0f0ff;
     }
-    .card[data-type="dec"] {
-      background: #eeeeee; /* svetlo siva */
+    .card.flipped[data-type="dec"] {
+      background: #eeeeee;
     }
     .matched {
       background: #d4edda !important;
       color: #2e7d32;
       pointer-events: none;
     }
-    .flipped {
-      background: #fff !important;
+    #restartBtn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      display: none;
     }
   </style>
 </head>
 <body>
   <h1>Ujemanje parov: dvojiško ↔ desetiško</h1>
+  <div id="controls">
+    <span>Izberi število parov:</span>
+    <button class="pair-btn" data-pairs="5">5</button>
+    <button class="pair-btn selected" data-pairs="10">10</button>
+    <button class="pair-btn" data-pairs="15">15</button>
+    <button onclick="startNewGame()">Začni igro</button>
+  </div>
   <div id="game"></div>
   <p id="status"></p>
+  <p id="counter">Število potez: 0</p>
+  <button id="restartBtn" onclick="startNewGame()">Nova igra</button>
 
   <script>
-    const numPairs = 6;
     let selected = [];
     let matched = [];
+    let moves = 0;
+    let numPairs = 10;
+
     const status = document.getElementById('status');
+    const counter = document.getElementById('counter');
+    const restartBtn = document.getElementById('restartBtn');
+    const pairButtons = document.querySelectorAll('.pair-btn');
+
+    pairButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        pairButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        numPairs = parseInt(btn.dataset.pairs);
+      });
+    });
 
     function generatePairs(n) {
-      const numbers = Array.from({ length: n }, (_, i) => i + 1);
+      const allNumbers = Array.from({ length: 15 }, (_, i) => i + 1);
+      const chosen = shuffle(allNumbers).slice(0, n);
       const pairs = [];
-      numbers.forEach(num => {
-        pairs.push({ value: num.toString(2), type: 'bin', match: num.toString() });
-        pairs.push({ value: num.toString(), type: 'dec', match: num.toString(2) });
+      chosen.forEach(num => {
+        const bin = num.toString(2).padStart(5, '0');
+        pairs.push({ value: bin, type: 'bin', match: num.toString() });
+        pairs.push({ value: num.toString(), type: 'dec', match: bin });
       });
       return shuffle(pairs);
     }
@@ -98,6 +140,8 @@
       selected.push(card);
 
       if (selected.length === 2) {
+        moves++;
+        counter.textContent = `Število potez: ${moves}`;
         const [first, second] = selected;
         if (first.dataset.match === second.dataset.value && second.dataset.match === first.dataset.value) {
           first.classList.add('matched');
@@ -117,11 +161,22 @@
       }
 
       if (matched.length === numPairs * 2) {
-        status.textContent = 'Našel si vse pare!';
+        status.textContent = 'Našel si vse pare.';
+        restartBtn.style.display = 'inline-block';
       }
     }
 
-    renderGame();
+    function startNewGame() {
+      matched = [];
+      selected = [];
+      moves = 0;
+      counter.textContent = 'Število potez: 0';
+      status.textContent = '';
+      restartBtn.style.display = 'none';
+      renderGame();
+    }
+
+    startNewGame();
   </script>
 </body>
 </html>
